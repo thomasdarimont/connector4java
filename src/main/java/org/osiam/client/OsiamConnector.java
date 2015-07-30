@@ -37,6 +37,7 @@ import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.osiam.client.exception.*;
 import org.osiam.client.oauth.AccessToken;
+import org.osiam.client.oauth.OauthClient;
 import org.osiam.client.oauth.Scope;
 import org.osiam.client.query.Query;
 import org.osiam.client.query.QueryBuilder;
@@ -155,6 +156,7 @@ public class OsiamConnector {
     private AuthService authService;
     private OsiamUserService userService;
     private OsiamGroupService groupService;
+    private OsiamClientService clientService;
 
     /**
      * The private constructor for the OsiamConnector. Please use the {@link OsiamConnector.Builder} to construct one.
@@ -247,6 +249,18 @@ public class OsiamConnector {
                     .build();
         }
         return groupService;
+    }
+
+    /**
+     *
+     * @return a valid OsiamClientService build out of the provided variables
+     */
+    private OsiamClientService clientService(){
+        if (clientService == null) {
+            clientService = new OsiamClientService.Builder(getResourceServiceEndpoint())
+                    .build();
+        }
+        return clientService;
     }
 
     /**
@@ -684,6 +698,27 @@ public class OsiamConnector {
      */
     public Group replaceGroup(String id, Group group, AccessToken accessToken) {
         return groupService().updateGroup(id, group, accessToken);
+    }
+
+    /**
+     * saves the given {@link org.osiam.client.oauth.OauthClient} to the OSIAM DB.
+     *
+     * @param client
+     *        client to be saved
+     * @param accessToken
+     *        the OSIAM access token from for the current session
+     * @return the same user Object like the given but with filled metadata and a new valid id
+     * @throws UnauthorizedException
+     *         if the request could not be authorized.
+     * @throws ConflictException
+     *         if the User could not be created
+     * @throws ForbiddenException
+     *         if the scope doesn't allow this request
+     * @throws ConnectionInitializationException
+     *         if the connection to the given OSIAM service could not be initialized
+     */
+    public OauthClient createClient(OauthClient client, AccessToken accessToken) {
+        return clientService().createClient(client, accessToken);
     }
 
     /**

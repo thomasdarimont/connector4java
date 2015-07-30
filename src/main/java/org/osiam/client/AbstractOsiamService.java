@@ -91,7 +91,7 @@ abstract class AbstractOsiamService<T extends Resource> {
         StatusType status;
         String content;
         try {
-            Response response = targetEndpoint.path(typeName + "s").path(id).request(MediaType.APPLICATION_JSON)
+            Response response = targetEndpoint.path(getPath()).path(id).request(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION, BEARER + accessToken.getToken())
                     .get();
 
@@ -118,7 +118,7 @@ abstract class AbstractOsiamService<T extends Resource> {
         StatusType status;
         String content;
         try {
-            Response response = targetEndpoint.path(typeName + "s")
+            Response response = targetEndpoint.path(getPath())
                     .queryParam("attributes", query.getAttributes())
                     .queryParam("filter", query.getFilter())
                     .queryParam("sortBy", query.getSortBy())
@@ -156,7 +156,7 @@ abstract class AbstractOsiamService<T extends Resource> {
         StatusType status;
         String content;
         try {
-            Response response = targetEndpoint.path(typeName + "s").path(id).request(MediaType.APPLICATION_JSON)
+            Response response = targetEndpoint.path(getPath()).path(id).request(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION, BEARER + accessToken.getToken())
                     .delete();
 
@@ -183,7 +183,7 @@ abstract class AbstractOsiamService<T extends Resource> {
         StatusType status;
         String content;
         try {
-            Response response = targetEndpoint.path(typeName + "s").request(MediaType.APPLICATION_JSON)
+            Response response = targetEndpoint.path(getPath()).request(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION, BEARER + accessToken.getToken())
                     .post(Entity.entity(resourceAsString, MediaType.APPLICATION_JSON));
 
@@ -196,6 +196,10 @@ abstract class AbstractOsiamService<T extends Resource> {
         checkAndHandleResponse(content, status, accessToken);
 
         return mapToResource(content);
+    }
+
+    protected String getPath() {
+        return typeName + "s";
     }
 
     protected T updateResource(String id, T resource, AccessToken accessToken) {
@@ -221,7 +225,7 @@ abstract class AbstractOsiamService<T extends Resource> {
         StatusType status;
         String content;
         try {
-            Response response = targetEndpoint.path(typeName + "s").path(id).request(MediaType.APPLICATION_JSON)
+            Response response = targetEndpoint.path(getPath()).path(id).request(MediaType.APPLICATION_JSON)
                     .header(AUTHORIZATION, BEARER + accessToken.getToken())
                     .method(method, Entity.entity(resourceAsString, MediaType.APPLICATION_JSON));
 
@@ -337,6 +341,12 @@ abstract class AbstractOsiamService<T extends Resource> {
                     ((ParameterizedType) getClass().getGenericSuperclass())
                             .getActualTypeArguments()[0];
             typeName = type.getSimpleName();
+        }
+
+        protected Builder(String endpoint, Class<T> type, String typeName){
+            this.endpoint = endpoint;
+            this.type = type;
+            this.typeName = typeName;
         }
     }
 }
